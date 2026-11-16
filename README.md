@@ -97,4 +97,6 @@ GPLv3, like NegPy. See [LICENSE](LICENSE).
 
 ## Support
 
-If DumbConvert saves you some time, you can buy me a coffee on [Ko-fi](https://ko-fi.com/jiijii0).
+If DumbConvert saves you some time, you can buy me a coffee.
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/jiijii0)

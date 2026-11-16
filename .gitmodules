@@ -1,0 +1,3 @@
+[submodule "vendor/negpy"]
+	path = vendor/negpy
+	url = https://github.com/marcinz606/NegPy

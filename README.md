@@ -6,8 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jiijii0/dumbconvert/releases"><img alt="Release" src="https://img.shields.io/github/v/release/jiijii0/dumbconvert?include_prereleases&label=release&color=2ee6ff"></a>
-  <a href="https://github.com/jiijii0/dumbconvert/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/jiijii0/dumbconvert/total?color=2ee6ff"></a>
+  <a href="https://github.com/jiijii0/dumbconvert/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/jiijii0/dumbconvert?label=release&color=2ee6ff"></a>
   <img alt="Status: beta" src="https://img.shields.io/badge/status-beta-orange">
   <img alt="macOS, Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple&logoColor=white">
   <img alt="Python 3.13+" src="https://img.shields.io/badge/python-3.13%2B-3776AB?logo=python&logoColor=white">
@@ -16,7 +15,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jiijii0/dumbconvert/releases"><b>Download the beta</b></a>
+  <a href="https://github.com/jiijii0/dumbconvert/releases/tag/v0.1.0-beta.2"><b>macOS beta</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/jiijii0/dumbconvert/releases/tag/windows-linux-alpha.1"><b>Windows alpha</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/jiijii0/dumbconvert/releases/tag/windows-linux-alpha.1"><b>Linux alpha</b></a>
+  <br>
+  <sub>The Windows and Linux alphas have not been tested yet.</sub>
 </p>
 
 ![DumbConvert](docs/screenshot.png)
@@ -38,8 +43,11 @@ Made for negatives scanned with a digital camera over a white light, colour or B
 
 ## Install
 
-1. Download the zip from [Releases](https://github.com/jiijii0/dumbconvert/releases) and unzip it.
+1. Download the zip from the [macOS beta](https://github.com/jiijii0/dumbconvert/releases/tag/v0.1.0-beta.2) and unzip it.
 2. Move **DumbConvert** to Applications.
+
+Windows and Linux (Flatpak): see the [alpha release](https://github.com/jiijii0/dumbconvert/releases/tag/windows-linux-alpha.1)
+for the files and how to install them. These builds have not been tested yet.
 
 ### First launch
 

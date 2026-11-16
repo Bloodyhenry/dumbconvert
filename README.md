@@ -19,6 +19,8 @@
   <a href="https://github.com/jiijii0/dumbconvert/releases"><b>Download the beta</b></a>
 </p>
 
+![DumbConvert](docs/screenshot.png)
+
 ## Why it's nice
 
 - **Drop and go.** Drop a roll, get good colour straight away.

@@ -94,3 +94,7 @@ To [NegPy](https://github.com/marcinz606/NegPy), by marcinz606 and its contribut
 engine is theirs; I built on it and tuned it for this app.
 
 GPLv3, like NegPy. See [LICENSE](LICENSE).
+
+## Support
+
+If DumbConvert saves you some time, you can buy me a coffee on [Ko-fi](https://ko-fi.com/jiijii0).

@@ -320,6 +320,24 @@ class FadeButton(QPushButton):
         self.setStyleSheet(f"QPushButton:!pressed {{ color: {mix(rest, lit, t)}; }}")
 
 
+def process_alive(pid: int) -> bool:
+    """Is a process with this id running? (Only asks: on Windows os.kill would end it.)"""
+    if sys.platform == "win32":
+        import ctypes
+        handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)      # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return False
+        code = ctypes.c_ulong()
+        ok = ctypes.windll.kernel32.GetExitCodeProcess(handle, ctypes.byref(code))
+        ctypes.windll.kernel32.CloseHandle(handle)
+        return bool(ok) and code.value == 259                               # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
 def button(text: str, slot=None, name: str = "") -> QPushButton:
     b = FadeButton(text)
     if name:
@@ -3292,13 +3310,9 @@ class MainWindow(QMainWindow):
         except (OSError, ValueError):
             return None
         pid = int(data.get("pid") or 0)
-        if pid and pid != os.getpid():
-            try:
-                os.kill(pid, 0)                      # that run is alive: the file is its, not ours
-                self._recovery_on = False
-                return None
-            except OSError:
-                pass
+        if pid and pid != os.getpid() and process_alive(pid):
+            self._recovery_on = False                # that run is alive: the file is its, not ours
+            return None
         photos = [ph for g in data.get("groups", []) for ph in g.get("photos", []) if Path(ph.get("path", "")).exists()]
         return data if photos else None
 

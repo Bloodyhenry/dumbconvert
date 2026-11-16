@@ -1,0 +1,99 @@
+# DumbConvert as a Flatpak (Linux, x86_64 and aarch64).
+# Build on Linux:  flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.jiijii0.DumbConvert.yml
+# Run:             flatpak run io.github.jiijii0.DumbConvert
+# The dependency lists (*.json) come from generate.py; run it again after changing a package version.
+app-id: io.github.jiijii0.DumbConvert
+runtime: org.kde.Platform              # brings every library Qt needs on X11 and Wayland
+runtime-version: '6.10'
+sdk: org.kde.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable     # for NegPy's Rust core (KDE 6.10 sits on freedesktop 25.08)
+command: dumbconvert
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --share=network                    # the place search in the Exif tab (Photon, OpenStreetMap)
+  # Scans are opened from anywhere and the converted files are saved next to them
+  - --filesystem=home
+  - --filesystem=/media
+  - --filesystem=/run/media
+  - --filesystem=/mnt
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/man
+  - '*.a'
+
+modules:
+  # The app is written for Python 3.14; the runtime has an older one, so this one is built here
+  - name: python3
+    config-opts:
+      - --with-ensurepip=install         # pip, from the wheel bundled with Python (no download)
+      - --without-static-libpython
+    post-install:
+      - rm -rf /app/lib/python3.14/test /app/lib/python3.14/idlelib /app/lib/python3.14/tkinter
+    cleanup:
+      - /bin/2to3*
+      - /bin/idle3*
+      - /bin/pydoc3*
+    sources:
+      - type: archive
+        url: https://www.python.org/ftp/python/3.14.10/Python-3.14.10.tar.xz
+        sha256: de414a57119abef52784d8993e341d53aed635fc2b05c2607d9f98a2c5b72032
+
+  # The Python packages, as ready-made Linux wheels (the same versions as the Mac and Windows builds)
+  - name: python-packages
+    buildsystem: simple
+    build-commands:
+      - /app/bin/python3.14 -m pip install --no-index --no-deps --no-compile --prefix=/app *.whl
+    sources:
+      - python-wheels.json
+
+  # NegPy's Rust core, compiled from the copy in vendor/negpy (untouched)
+  - name: negpy-core
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin
+      env:
+        CARGO_HOME: /run/build/negpy-core/cargo
+        CARGO_NET_OFFLINE: 'true'
+    build-commands:
+      - /app/bin/python3.14 -m pip install --no-index --no-deps --target=tools maturin-*.whl
+      - tools/bin/maturin build --release --offline --features python -i /app/bin/python3.14 -o wheels
+      - /app/bin/python3.14 -m pip install --no-index --no-deps --no-compile --prefix=/app wheels/*.whl
+    sources:
+      - type: dir
+        path: ../../vendor/negpy/negpy_core
+        skip:
+          - target
+      - cargo-sources.json
+      - maturin-wheels.json
+
+  # The app itself, with the parts of NegPy it reads (engine code, film stocks, colour profiles)
+  - name: dumbconvert
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/share/dumbconvert/vendor/negpy
+      - cp -r simpleneg /app/share/dumbconvert/
+      - cp -r vendor/negpy/negpy vendor/negpy/gear vendor/negpy/icc vendor/negpy/crosstalk vendor/negpy/VERSION
+        /app/share/dumbconvert/vendor/negpy/
+      - find /app/share/dumbconvert -name __pycache__ -prune -exec rm -rf {} +
+      - install -Dm755 packaging/flatpak/dumbconvert.sh /app/bin/dumbconvert
+      - install -Dm644 packaging/flatpak/io.github.jiijii0.DumbConvert.desktop -t /app/share/applications
+      - install -Dm644 packaging/flatpak/io.github.jiijii0.DumbConvert.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 LICENSE /app/share/licenses/io.github.jiijii0.DumbConvert/LICENSE
+      - for s in 128 256 512; do install -Dm644 packaging/flatpak/icon-$s.png
+        /app/share/icons/hicolor/${s}x${s}/apps/io.github.jiijii0.DumbConvert.png; done
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - .git
+          - .venv
+          - build
+          - dist
+          - build-dir
+          - .flatpak-builder
+          - vendor/negpy/negpy_core/target

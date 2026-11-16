@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.jiijii0.DumbConvert</id>
+  <name>DumbConvert</name>
+  <summary>Convert camera scans of film negatives</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <developer id="io.github.jiijii0">
+    <name>jiijii0</name>
+  </developer>
+  <description>
+    <p>
+      A quick film-negative converter for negatives scanned with a digital camera over a white light.
+      Drop a roll in, get good colour straight away, nudge a few faders, export. Built on NegPy.
+    </p>
+    <ul>
+      <li>A roll is measured as one, so its frames share the same colour</li>
+      <li>Six faders, like a lab scanner, and everything works from the keyboard</li>
+      <li>Crop to film formats, dust and scratch removal, contact sheets</li>
+      <li>Film stock, camera, lens, date and place written into the files</li>
+      <li>JPEG, HEIC, TIFF, PNG, AVIF, JPEG XL, WebP or DNG</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.jiijii0.DumbConvert.desktop</launchable>
+  <url type="homepage">https://github.com/jiijii0/dumbconvert</url>
+  <url type="bugtracker">https://github.com/jiijii0/dumbconvert/issues</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/jiijii0/dumbconvert/main/docs/screenshot.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0-beta.2" date="2026-11-16"/>
+  </releases>
+</component>

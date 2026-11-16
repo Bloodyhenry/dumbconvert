@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=DumbConvert
+GenericName=Film Negative Converter
+Comment=Convert camera scans of film negatives
+Exec=dumbconvert %F
+Icon=io.github.jiijii0.DumbConvert
+Terminal=false
+Categories=Graphics;Photography;
+Keywords=film;negative;scan;convert;raw;

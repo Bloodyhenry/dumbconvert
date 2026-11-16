@@ -1,0 +1,35 @@
+# Builds the Flatpak on GitHub's Linux machines, for normal PCs and for ARM.
+# Each run leaves a DumbConvert-<arch>.flatpak to download under the run's "Artifacts";
+# install it with:  flatpak install --user DumbConvert-x86_64.flatpak
+name: Flatpak
+
+on:
+  workflow_dispatch:          # start it by hand from the Actions tab
+  push:
+    tags: ["v*"]              # and for every release tag
+
+jobs:
+  flatpak:
+    name: Flatpak ${{ matrix.variant.arch }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
+      options: --privileged
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4
+        with:
+          submodules: true    # NegPy, in vendor/negpy
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          manifest-path: packaging/flatpak/io.github.jiijii0.DumbConvert.yml
+          bundle: DumbConvert-${{ matrix.variant.arch }}.flatpak
+          arch: ${{ matrix.variant.arch }}
+          cache-key: flatpak-builder-${{ github.sha }}

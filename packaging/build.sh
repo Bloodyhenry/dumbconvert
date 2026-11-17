@@ -28,6 +28,7 @@ rm -rf build dist
   --add-data "$N/icc:icc" --add-data "$N/crosstalk:crosstalk" --add-data "$N/gear:gear" \
   --add-data "$N/VERSION:." \
   --add-data "LICENSE:." \
+  --add-data "simpleneg/icons:simpleneg/icons" \
   packaging/dumbconvert.py
 # Memory: macOS gives freed picture memory back at once instead of caching gigabytes of it
 # (see main() in simpleneg/app.py). Must be in the Info.plist: it is read when the app starts.

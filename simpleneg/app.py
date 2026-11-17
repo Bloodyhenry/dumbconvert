@@ -1230,27 +1230,35 @@ class ChoiceCard(QFrame):
 
 
 class LabeledSlider(QWidget):
-    """A slider with a name and value readout (used for Straighten)."""
+    """A slider with a name and editable angle (used for Straighten)."""
 
     changed = Signal()
 
-    def __init__(self, name: str, lo: float, hi: float, default: float, fmt="{:+.2f}"):
+    def __init__(self, name: str, lo: float, hi: float, default: float):
         super().__init__()
-        self.lo, self.hi, self.default, self.fmt = lo, hi, default, fmt
+        self.default = default
         self.name = QLabel(name)
         self.name.setToolTip("Double-click to reset")
-        self.value_label = QLabel()
-        self.value_label.setAlignment(Qt.AlignRight)
+        self.value_input = QDoubleSpinBox()
+        self.value_input.setObjectName("straightenAngle")
+        self.value_input.setRange(lo, hi)
+        self.value_input.setDecimals(1)
+        self.value_input.setSingleStep(0.1)
+        self.value_input.setSuffix("°")
+        self.value_input.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.value_input.setAccessibleName(name)
+        self.value_input.setKeyboardTracking(False)
+        self.value_input.valueChanged.connect(lambda v: self.set_value(v, emit=True))
         self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(0, 1000)
+        self.slider.setRange(round(lo * 10), round(hi * 10))
         self.slider.valueChanged.connect(self._on_slider)
         self.pressed, self.released = self.slider.sliderPressed, self.slider.sliderReleased
         self.name.setObjectName("rowLabel")
-        self.value_label.setObjectName("faderValue")
         self.top = top = QHBoxLayout()            # a button can be added at its right end
         top.addWidget(self.name)
         top.addStretch(1)
-        top.addWidget(self.value_label)
+        top.setAlignment(Qt.AlignVCenter)
+        top.addWidget(self.value_input)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 2, 0, 2)
         lay.setSpacing(8)
@@ -1260,21 +1268,18 @@ class LabeledSlider(QWidget):
         self.set_value(default)
 
     def value(self) -> float:
-        return self.lo + (self.hi - self.lo) * self.slider.value() / 1000
+        return self.slider.value() / 10
 
     def set_value(self, v: float, emit: bool = False):
         self.slider.blockSignals(not emit)
-        self.slider.setValue(round((v - self.lo) / (self.hi - self.lo) * 1000))
+        self.slider.setValue(round(v * 10))
         self.slider.blockSignals(False)
         self._show_value()
 
     def _show_value(self):
-        self.value_label.setText(self.fmt.format(self.value()))
-        edited = abs(self.value() - self.default) > (self.hi - self.lo) / 2000     # half a slider step
-        if self.value_label.property("edited") != edited:      # violet once it is off its default
-            self.value_label.setProperty("edited", edited)
-            self.value_label.style().unpolish(self.value_label)
-            self.value_label.style().polish(self.value_label)
+        self.value_input.blockSignals(True)
+        self.value_input.setValue(self.value())
+        self.value_input.blockSignals(False)
 
     def _on_slider(self):
         self._show_value()
@@ -2543,14 +2548,21 @@ class MainWindow(QMainWindow):
         crop_row.addWidget(self.autocrop_cb)
         crop_row.addWidget(self.crop_btn)
         lay.addLayout(crop_row)
-        self.straighten = LabeledSlider("Straighten", -15.0, 15.0, 0.0, "{:+.1f}°")
+        self.straighten = LabeledSlider("Straighten", -15.0, 15.0, 0.0)
         self.straighten.setToolTip("Small rotation to level the picture; empty corners are cropped away")
         self.straighten.changed.connect(self.on_straighten_slider)
         self.straighten.pressed.connect(lambda: self._show_grid(True))
         self.straighten.released.connect(self._straighten_released)
         self.auto_straighten_btn = button("Auto", self.auto_straighten, "toggle")
         self._tip(self.auto_straighten_btn, "Measures the film frame's edges and levels the picture", "auto_straighten")
-        self.straighten.top.addSpacing(10)
+        self.autocrop_cb.ensurePolished()
+        self.straighten.value_input.ensurePolished()
+        angle_input = self.straighten.value_input
+        angle_width = max(self.autocrop_cb.sizeHint().width(),
+                          angle_input.fontMetrics().horizontalAdvance("-15.0°") + 32)
+        self.autocrop_cb.setFixedWidth(angle_width)
+        self.straighten.value_input.setFixedSize(angle_width, self.autocrop_cb.sizeHint().height())
+        self.straighten.top.setSpacing(6)
         self.straighten.top.addWidget(self.auto_straighten_btn)
         lay.addWidget(self.straighten)
         right.addWidget(p)
@@ -4855,6 +4867,18 @@ QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox { background: @field; border: 1px
                                                   selection-color: @on_accent; }
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QDateEdit:focus { background: #202126;
                                                                                          border-color: @accent2; }
+QDoubleSpinBox#straightenAngle { padding: 4px 22px 4px 4px; }
+QDoubleSpinBox#straightenAngle QLineEdit { background: transparent; border: none; padding: 0; }
+QDoubleSpinBox#straightenAngle::up-button, QDoubleSpinBox#straightenAngle::down-button {
+    subcontrol-origin: padding; width: 16px; border: none; background: transparent; margin-right: 2px; }
+QDoubleSpinBox#straightenAngle::up-button { subcontrol-position: top right; border-top-right-radius: 4px; }
+QDoubleSpinBox#straightenAngle::down-button { subcontrol-position: bottom right; border-bottom-right-radius: 4px; }
+QDoubleSpinBox#straightenAngle::up-button:hover, QDoubleSpinBox#straightenAngle::down-button:hover { background: @raise; }
+QDoubleSpinBox#straightenAngle::up-button:pressed, QDoubleSpinBox#straightenAngle::down-button:pressed { background: @select; }
+QDoubleSpinBox#straightenAngle::up-arrow, QDoubleSpinBox#straightenAngle::down-arrow { width: 7px; height: 5px; }
+QDoubleSpinBox#straightenAngle::up-arrow { image: url("@icons/angle-up.svg"); }
+QDoubleSpinBox#straightenAngle::down-arrow { image: url("@icons/angle-down.svg"); }
+QDoubleSpinBox#straightenAngle::up-arrow:disabled, QDoubleSpinBox#straightenAngle::down-arrow:disabled { width: 0; height: 0; }
 QDateEdit { background: @field; border: 1px solid transparent; border-radius: 6px;
             padding: 4px 8px; font-size: 12px; }
 QDateEdit[inherited="true"] { color: @muted; }
@@ -4911,7 +4935,7 @@ QScrollArea { border: none; }
 
 
 def make_style(mono: str = MONO) -> str:
-    style = STYLE_TEMPLATE.replace("@mono", mono)
+    style = STYLE_TEMPLATE.replace("@mono", mono).replace("@icons", (Path(__file__).parent / "icons").as_posix())
     for name in sorted(COLORS, key=len, reverse=True):     # accent_hover before accent
         style = style.replace("@" + name, COLORS[name])
     return style
